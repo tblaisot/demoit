@@ -20,11 +20,18 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/pkg/errors"
 )
 
 var Root = "."
+
+type NodePath struct {
+	Name string
+	IsDir bool
+	Children *[]NodePath
+}
 
 // Read reads a file in .demoit folder.
 func Read(path ...string) ([]byte, error) {
@@ -36,6 +43,30 @@ func Read(path ...string) ([]byte, error) {
 	return content, nil
 }
 
+// Get tree repository in folder.
+func Tree(rootPath string) (NodePath, error) {
+	var folder = fullpath([]string{rootPath})
+	var root = NodePath{
+		Name: rootPath,
+		IsDir: true,
+		Children: &[]NodePath{},
+	}
+	var err = filepath.Walk(folder, func(path string, info os.FileInfo, err error) error {
+		splitPath := strings.Split(path, string(filepath.Separator))
+		var currentFolder = &root
+		for _, path := range splitPath {
+			if path == Root || path ==  rootPath {
+				continue
+			}
+			currentFolder = getNodePath(currentFolder, path, info)
+		}
+		return nil
+	})
+	return root, err
+}
+
+
+
 // Exists tests if a file exists.
 func Exists(path ...string) bool {
 	_, err := os.Stat(fullpath(path))
@@ -44,4 +75,21 @@ func Exists(path ...string) bool {
 
 func fullpath(path []string) string {
 	return filepath.Join(Root, filepath.Join(path...))
+}
+
+func getNodePath(parent *NodePath, currentPath string, info os.FileInfo) *NodePath {
+	if parent.Children != nil {
+		for _, child := range *parent.Children {
+			if child.Name == currentPath {
+				return &child
+			}
+		}
+	}
+	var nodePath = &NodePath{
+		Name: info.Name(),
+		IsDir: info.IsDir(),
+		Children: &[]NodePath{},
+	}
+	*parent.Children = append(*parent.Children, *nodePath)
+	return nodePath
 }

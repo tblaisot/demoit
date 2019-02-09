@@ -41,8 +41,8 @@ document.addEventListener("keydown", event => {
 
 // Maximize a "window".
 function maximize(w) {
-    if (w.savedStyle != undefined) {
-        w.style = w.savedStyle
+    if (w.savedStyle !== undefined) {
+        w.style = w.savedStyle;
         w.savedStyle = undefined;
         return;
     }
@@ -194,11 +194,11 @@ customElements.define('source-code', class extends HTMLElement {
     background-color: rgb(191, 214, 255) !important;
 }
 
-</style>`
+</style>`;
 
         let tabs = `<div class="files">`;
         for (var i = 0; i < files.length; i++) {
-            tabs += `<a class="${(i == 0) ? "selected" : ""}" href="#">${files[i]}<span class="close">x</span></a>`
+            tabs += `<a class="${(i === 0) ? "selected" : ""}" href="#">${files[i]}<span class="close">x</span></a>`
         }
         tabs += `</div>`;
 
@@ -251,7 +251,7 @@ customElements.define('web-browser', class extends HTMLElement {
     }
 
     connectedCallback() {
-        const src = this.getAttribute('src')
+        const src = this.getAttribute('src');
 
         this.shadowRoot.innerHTML = `
 <style>
@@ -402,7 +402,7 @@ customElements.define('web-term', class extends HTMLElement {
     }
 
     addTab() {
-        const path = this.getAttribute('path')
+        const path = this.getAttribute('path');
 
         const div = document.createElement('div');
         div.innerHTML = `
@@ -520,5 +520,237 @@ iframe {
 
         this.addTab();
     }
-})
+});
+
+customElements.define('web-tree', class extends HTMLElement {
+    constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
+    }
+
+    connectedCallback() {
+        const folder = this.getAttribute('path').trim();
+        if (folder.length === 0) {
+            return;
+        }
+
+        this.shadowRoot.innerHTML = `<style>
+.browser {
+    font-size: 18px;
+    padding: 2.1em 0 0 0;
+    border-radius: 0.4em;
+    background: #ddd;
+    display: inline-block;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 0.25em 0.9em -0.1em rgba(0,0,0,.3);
+    width: 100%;
+    height: calc(100% - 40px);
+    background-color: white;
+}
+
+.browser .browser-navigation-bar {
+    display: block;
+    box-sizing: border-box;
+    height: 2.1em;
+    position: absolute;
+    top: 0;
+    padding: 0.3em;
+    width: 100%;
+    background: linear-gradient(to bottom, #edeaed 0%, #dddfdd 100%);
+    border-bottom: 2px solid #cbcbcb;
+    border-radius: 0.4em 0.4em 0 0;
+}
+    
+.browser i {
+    display: inline-block;
+    height: 0.7em;
+    width: 0.7em;
+    border-radius: 0.45em;
+    background-color: #eee;
+    margin: 0.4em 0.15em;
+}
+
+.browser i:nth-child(1) {background-color: rgb(255, 86, 79); border: 0.5px solid rgb(235, 56, 49);}
+.browser i:nth-child(1):hover {background-color: rgb(255, 20, 25)}
+.browser i:nth-child(2) {background-color: rgb(255, 183, 42); border: 0.5px solid rgb(235, 163, 22);}
+.browser i:nth-child(2):hover {background-color: rgb(230, 175, 42)}
+.browser i:nth-child(3) {background-color: rgb(37, 198, 58); border: 0.5px solid rgb(17, 178, 38);}
+.browser i:nth-child(3):hover {background-color: rgb(10, 225, 10)}
+
+.title {
+    font-size: 0.75em;
+    vertical-align: top;
+    display: inline-block;
+    height: 2.1em;
+    width: calc(100% - 6em);
+    padding: 0.4em 0.4em 0 0.4em;
+    color: black;
+    text-align: left;
+    overflow: hidden;
+    white-space: nowrap;
+    font-family: system-ui;
+}
+
+.browser-container {
+    height: 100%;
+    width: 100%;
+    overflow: auto;
+    text-align: left;
+}
+
+.hl {
+    background-color: rgb(191, 214, 255) !important;
+}
+
+ul, #tree {
+  list-style-type: none;
+}
+
+#tree {
+  margin: 0;
+  padding: 0;
+}
+
+.nested {
+  display: none;
+}
+
+.active {
+  display: block;
+}
+
+@font-face {
+  font-family: 'Font Awesome 5 Free';
+  font-style: normal;
+  font-weight: 400;
+  font-display: auto;
+  src: url("../fonts/fa-regular-400.eot");
+  src: url("../fonts/fa-regular-400.eot?#iefix") format("embedded-opentype"), url("../fonts/fa-regular-400.woff2") format("woff2"), url("../fonts/fa-regular-400.woff") format("woff"), url("../fonts/fa-regular-400.ttf") format("truetype"), url("../fonts/fa-regular-400.svg#fontawesome") format("svg"); 
+}
+
+@font-face {
+  font-family: 'Font Awesome 5 Free';
+  font-style: normal;
+  font-weight: 900;
+  font-display: auto;
+  src: url("../fonts/fa-solid-900.eot");
+  src: url("../fonts/fa-solid-900.eot?#iefix") format("embedded-opentype"), url("../fonts/fa-solid-900.woff2") format("woff2"), url("../fonts/fa-solid-900.woff") format("woff"), url("../fonts/fa-solid-900.ttf") format("truetype"), url("../fonts/fa-solid-900.svg#fontawesome") format("svg"); 
+}
+
+.far, .fas {
+  font-family: 'Font Awesome 5 Free';
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: antialiased;
+  display: inline-block;
+  font-style: normal;
+  font-variant: normal;
+  text-rendering: auto;
+}
+
+.far:before, .fas:before {
+  margin-right: 6px;
+}
+
+.fas {
+  font-weight: 900; 
+}
+
+.far {
+  font-weight: 400;
+}
+
+.fa-folder, fa-file {
+  cursor: pointer; 
+  user-select: none;
+}
+
+.fa-folder:before, .fa-folder-open:before {
+  color: #708090;
+  line-height: 2;
+}
+
+.fa-folder:before {
+  content: "\\f07b";
+}
+.fa-folder-open:before {
+  content: "\\f07c"; 
+}
+
+.fa-file:before {
+  content: "\\f15b"; 
+  line-height: 1;
+}
+
+</style>`;
+
+        const xhr = new XMLHttpRequest();
+        xhr.addEventListener('load', (r) => {
+            status = r.target.status;
+            if (status !== "200") {
+                return;
+            }
+            const content = JSON.parse(xhr.responseText);
+
+            const div = document.createElement('div');
+            div.innerHTML = `
+<div class="browser">
+    <div class="browser-navigation-bar">
+        <i></i><i></i><i class="green"></i>
+        <span class="title">${folder}</span>
+    </div>
+</div>`;
+            const comp = this.shadowRoot.appendChild(div.lastChild);
+            comp.getElementsByClassName('green')[0].onclick = () => maximize(comp);
+
+            if (content) {
+                const browserContainer = document.createElement('div');
+                browserContainer.className = "browser-container";
+                const treeContainer = document.createElement('ul');
+                treeContainer.id = 'tree';
+                const tree = this.appendNode(content, treeContainer);
+                browserContainer.appendChild(tree);
+                comp.appendChild(browserContainer);
+            }
+            const folders = comp.getElementsByClassName('folder');
+            let i;
+
+            for (i = 0; i < folders.length; i++) {
+                const folder = folders[i];
+                folder.onclick = () => {
+                    folder.parentElement.querySelector(".nested").classList.toggle("active");
+                    folder.classList.toggle("fa-folder");
+                    folder.classList.toggle("fa-folder-open");
+                }
+            }
+        });
+        xhr.open('GET', `/tree/${folder}`);
+        xhr.send();
+    }
+
+    appendNode(node, parent) {
+        const li = document.createElement('li');
+        const span = document.createElement('span');
+
+        span.innerHTML = node.Name;
+        li.appendChild(span);
+
+        if (node.IsDir) {
+          span.className = 'folder fas fa-folder';
+
+          if (node.Children && node.Children.length > 0) {
+              let nested = document.createElement('ul');
+              nested.className = 'nested';
+              node.Children.forEach((child) => {
+                  li.appendChild(this.appendNode(child, nested));
+              });
+
+          }
+        } else {
+            span.className = 'far fa-file';
+        }
+        parent.appendChild(li);
+        return parent;
+    };
+});
 

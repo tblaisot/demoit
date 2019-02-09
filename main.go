@@ -41,6 +41,7 @@ func main() {
 	r.PathPrefix("/sourceCode/").HandlerFunc(handlers.Code).Methods("GET")
 	r.HandleFunc("/shell/", handlers.Shell).Methods("GET")
 	r.HandleFunc("/shell/{folder}", handlers.Shell).Methods("GET")
+	r.HandleFunc("/tree/{folder}", handlers.Tree).Methods("GET")
 	r.PathPrefix("/ping").HandlerFunc(handlers.Ping).Methods("HEAD", "GET")
 	r.PathPrefix("/js/").HandlerFunc(handlers.Static).Methods("GET")
 	r.PathPrefix("/fonts/").HandlerFunc(handlers.Static).Methods("GET")

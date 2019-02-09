@@ -1,2 +1,5 @@
 demoit
+*.exe
 .DS_Store
+*.iml
+.idea/

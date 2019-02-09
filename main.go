@@ -44,9 +44,9 @@ func main() {
 	r.HandleFunc("/tree/{folder}", handlers.Tree).Methods("GET")
 	r.PathPrefix("/ping").HandlerFunc(handlers.Ping).Methods("HEAD", "GET")
 	r.PathPrefix("/js/").HandlerFunc(handlers.Static).Methods("GET")
+	r.PathPrefix("/css/").HandlerFunc(handlers.Static).Methods("GET")
 	r.PathPrefix("/fonts/").HandlerFunc(handlers.Static).Methods("GET")
 	r.PathPrefix("/images/").HandlerFunc(handlers.Static).Methods("GET")
-	r.HandleFunc("/style.css", handlers.Static).Methods("GET")
 
 	go startWebServer(8888, r)
 	if *flags.DevMode {

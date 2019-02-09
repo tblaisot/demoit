@@ -78,7 +78,7 @@ a, a:visited {
     height: calc(100% - 8em);
 }
 
-web-term, web-browser, source-code, web-tree {
+web-term, web-browser, source-code {
     flex: 1;
 }
 
@@ -94,12 +94,12 @@ web-term:only-child, web-browser:only-child, source-code:only-child, web-tree:on
     margin: 0;
 }
 
-web-tree:first-child {
-    flex: 0.3;
-}
-
 web-tree:only-child {
     flex: 1 !important;
+}
+
+web-tree:first-child {
+    flex: 0.3;
 }
 
 #nav {

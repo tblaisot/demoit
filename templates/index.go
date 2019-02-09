@@ -23,7 +23,8 @@ func Index(content []byte) string {
       <head>
         <meta charset="utf-8">
         <title>Demo</title>
-        <link rel="stylesheet" href="/style.css">
+        <link rel="stylesheet" href="/css/style.css">
+        <link rel="stylesheet" href="/css/fontawesome.css">
         <script>
             const NextURL = '{{ .NextURL }}';
             const PrevURL = '{{ .PrevURL }}';

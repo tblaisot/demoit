@@ -36,9 +36,7 @@ func ListenAndServe(workingDir string, port int, command string, args ...string)
 		PermitArguments: true,
 		Preferences: &server.HtermPrefernces{
 			FontSize:        20,
-			FontFamily:      "Inconsolata for Powerline, monaco",
 			BackgroundColor: "rgb(11,40,50)",
-			// ForegroundColor: "rgb(131,148,150)",
 			ForegroundColor: "rgb(255, 255, 255)",
 		},
 	}

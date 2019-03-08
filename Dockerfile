@@ -16,7 +16,7 @@ WORKDIR /root/
 COPY --from=builder /go/src/github.com/dgageot/demoit/demoit .
 ADD sample demo
 
-EXPOSE 8888 9000
+EXPOSE 8888 9999
 
 ENTRYPOINT ["./demoit"]
 CMD ["demo"]
